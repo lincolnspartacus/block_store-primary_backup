@@ -23,7 +23,7 @@ void run_server(char* loc)
 {
     std::string mountpoint(loc);
     std::string server_address("localhost:50051");
-    FileRPCServiceImpl service(mountpoint);
+    BlockRPCServiceImpl service(mountpoint);
     ServerBuilder builder;
     
     // Listen on the given address without any authentication mechanism.

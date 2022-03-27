@@ -4,7 +4,7 @@
 #include "block_client.h"
 #include <sys/stat.h>
 
-FileRPCClient* g_RPCCLient = nullptr;
+BlockRPCClient* g_RPCCLient = nullptr;
 
 
 int main(int argc, char *argv[])
