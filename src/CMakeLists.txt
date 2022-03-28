@@ -1,18 +1,28 @@
 # CMakeLists.txt
 cmake_minimum_required(VERSION 3.10)
 project(RBS)
-file(GLOB SRCS_SERVER server.cc block_server.cpp)
+file(GLOB SRCS_SERVER server.cc block_server.cpp state_machine.cpp)
 file(GLOB SRCS_CLIENT client.cpp block_client.cpp)
 
-add_executable(server ${SRCS_SERVER})
+add_executable(primary ${SRCS_SERVER})
+add_executable(backup ${SRCS_SERVER})
 add_executable(client ${SRCS_CLIENT})
 
-target_link_libraries(server
+target_link_libraries(primary
         Threads::Threads
         gRPC::grpc++
         p3protolib)
-add_dependencies(server p3protolib)
-set_target_properties(server PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+add_dependencies(primary p3protolib)
+set_target_properties(primary PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+target_compile_options(primary PRIVATE -DDEFAULT_ROLE=STATE_PRIMARY)
+
+target_link_libraries(backup
+        Threads::Threads
+        gRPC::grpc++
+        p3protolib)
+add_dependencies(backup p3protolib)
+set_target_properties(backup PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+target_compile_options(backup PRIVATE -DDEFAULT_ROLE=STATE_BACKUP)
 
 target_link_libraries(client
         Threads::Threads
