@@ -1,5 +1,5 @@
-#ifndef RBS_BLOCK_CLIENT_H
-#define RBS_BLOCK_CLIENT_H
+#ifndef PRIMARYBACKUP_CLIENT_H
+#define PRIMARYBACKUP_CLIENT_H
 
 #include "rbs.grpc.pb.h"
 
