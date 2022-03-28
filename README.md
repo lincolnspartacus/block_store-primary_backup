@@ -1,4 +1,4 @@
-# Replicated Block Store
+# Replicated Block Store.
 
 ## GPRC install path  
 ```
