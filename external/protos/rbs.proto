@@ -8,3 +8,7 @@ message MessageInt {
 service BlockRPC {
   rpc DoMessageInt (MessageInt) returns (MessageInt) {}
 }
+
+service PrimaryBackupRPC {
+  rpc GetState (MessageInt) returns (MessageInt) {}
+}

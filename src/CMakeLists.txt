@@ -1,7 +1,7 @@
 # CMakeLists.txt
 cmake_minimum_required(VERSION 3.10)
 project(RBS)
-file(GLOB SRCS_SERVER server.cc block_server.cpp state_machine.cpp)
+file(GLOB SRCS_SERVER server.cc block_server.cpp state_machine.cpp primarybackup_server.cpp primarybackup_client.cpp)
 file(GLOB SRCS_CLIENT client.cpp block_client.cpp)
 
 add_executable(primary ${SRCS_SERVER})
