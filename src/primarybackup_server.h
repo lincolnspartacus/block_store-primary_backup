@@ -1,5 +1,5 @@
-#ifndef RBS_BLOCK_SERVER_H
-#define RBS_BLOCK_SERVER_H
+#ifndef PRIMARYBACKUP_SERVER_H
+#define PRIMARYBACKUP_SERVER_H
 
 
 #include "rbs.grpc.pb.h"
@@ -16,10 +16,8 @@ using namespace std;
 
 class PrimaryBackupRPCServiceImpl final : public PrimaryBackupRPC::Service
 {
-private:
-    PrimaryBackupRPCServiceImpl() { };
 public:
-    PrimaryBackupRPCServiceImpl(const std::string& fileStore);
+    PrimaryBackupRPCServiceImpl() {};
 
 protected:
     Status GetState(ServerContext *context, const MessageInt *request

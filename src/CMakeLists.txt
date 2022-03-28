@@ -14,7 +14,7 @@ target_link_libraries(primary
         p3protolib)
 add_dependencies(primary p3protolib)
 set_target_properties(primary PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
-target_compile_options(primary PRIVATE -DDEFAULT_ROLE=STATE_PRIMARY)
+target_compile_options(primary PRIVATE -DDEFAULT_ROLE=STATE_PRIMARY -DSELF_IP="localhost:50052" -DOTHER_IP="localhost:50053")
 
 target_link_libraries(backup
         Threads::Threads
@@ -22,7 +22,7 @@ target_link_libraries(backup
         p3protolib)
 add_dependencies(backup p3protolib)
 set_target_properties(backup PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
-target_compile_options(backup PRIVATE -DDEFAULT_ROLE=STATE_BACKUP)
+target_compile_options(backup PRIVATE -DDEFAULT_ROLE=STATE_BACKUP -DSELF_IP="localhost:50053" -DOTHER_IP="localhost:50052")
 
 target_link_libraries(client
         Threads::Threads

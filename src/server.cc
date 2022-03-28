@@ -1,4 +1,6 @@
 #include "block_server.h"
+#include "primarybackup_server.h"
+#include "state_machine.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 
@@ -22,7 +24,11 @@ void mountdir(char* root){
 void run_server(char* loc)
 {
     std::string mountpoint(loc);
-    std::string server_address("localhost:50051");
+    std::string server_address;
+    if(DEFAULT_ROLE == STATE_PRIMARY)
+        server_address = "localhost:50050";
+    else
+        server_address = "localhost:50051";
     BlockRPCServiceImpl service(mountpoint);
     ServerBuilder builder;
     
@@ -37,11 +43,20 @@ void run_server(char* loc)
     builder.RegisterService(&service);
     // Finally assemble the server.
     std::unique_ptr<Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on " << server_address << std::endl;
+    std::cout << "Server listening for clients on " << server_address << std::endl;
+
+    // gRPC between Primary-Backup
+    PrimaryBackupRPCServiceImpl service2;
+    ServerBuilder builder2;
+    builder2.AddListeningPort(SELF_IP, grpc::InsecureServerCredentials());
+    builder2.RegisterService(&service2);
+    std::unique_ptr<Server> server2(builder2.BuildAndStart());
+    std::cout << "Primary-Backup comm on " << SELF_IP << std::endl;
 
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
     server->Wait();
+    server2->Wait();
 }
 
 int main(int argc, char* argv[])
