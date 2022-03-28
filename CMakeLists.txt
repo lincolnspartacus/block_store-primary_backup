@@ -11,9 +11,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 project(RBS)
 
+find_package(protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 find_package(Threads REQUIRED)
-find_package(protobuf CONFIG REQUIRED)
 
 
 add_subdirectory(external)

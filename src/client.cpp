@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   g_RPCCLient =  new BlockRPCClient ( grpc::CreateCustomChannel(target_str, grpc::InsecureChannelCredentials() , ch_args ) ); 
   int sent = 10;
   int answer = g_RPCCLient->DoMessageInt(sent);
-  printf("Sent is %d",sent);
-  printf("Reply is %d",answer);
+  printf("Sent is %d\n",sent);
+  printf("Reply is %d\n",answer);
   return 0;
 }
