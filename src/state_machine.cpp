@@ -7,38 +7,43 @@ const enum ServerStates StateMachine::getState()
     return state;
 }
 
-void StateMachine::loop()
+void StateMachine::setState(enum ServerStates target_state)
 {
-    enum ServerStates state_other;
-    while(1) {
-        switch(state) {
-            case STATE_START:
-            // TODO: RPC call to retreive state of other server
-            // TODO : If no response from other server, become the PRIMARY
+    std::string state_strings[] = {"STATE_START", "STATE_PRIMARY", "STATE_BACKUP"};
+    std::cout << "[setState] Setting state to " << state_strings[target_state] << "\n";
+    state = target_state;
+}
 
-            state_other = STATE_START;
-            if (state_other == STATE_START) {
-                state = DEFAULT_ROLE; // Fed in from CMakeLists.txt as a -D compiler constant
-            } else if (state_other == STATE_PRIMARY) {
-                // We become the backup
-                // TODO: Get log of operations from PRIMARY
-                state = STATE_BACKUP;
-            } else if (state_other == STATE_BACKUP) {
-                // Become the primary
-                // TODO : Ensure we don't have 2 PRIMARIES
-                state = STATE_PRIMARY;
-            }
-            break;
+void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
+{
+    int state_other;
+    switch(state) {
+        case STATE_START:
+        state_other = g_RPCCLient->GetState(5);
 
-            case STATE_PRIMARY:
-            // Just process requests here
-            // TODO: Keep log of requests in case BACKUP is dead
-            break;
-
-            case STATE_BACKUP:
-            // Client requests will be asynchronous
-            // Try reaching Primary. If unreachable, become primary
-            break;
+        if (state_other == -1) {
+            setState(STATE_PRIMARY); // If no response from other server, become the PRIMARY
+        } else if (state_other == STATE_START) {
+            setState(DEFAULT_ROLE); // Fed in from CMakeLists.txt as a -D compiler constant
+        } else if (state_other == STATE_PRIMARY) {
+            // We become the backup
+            // TODO: Get log of operations from PRIMARY
+            setState(STATE_BACKUP);
+        } else if (state_other == STATE_BACKUP) {
+            // Become the primary
+            // TODO : Ensure we don't have 2 PRIMARIES
+            setState(STATE_PRIMARY);
         }
+        break;
+
+        case STATE_PRIMARY:
+        // Just process requests here
+        // TODO: Keep log of requests in case BACKUP is dead
+        break;
+
+        case STATE_BACKUP:
+        // Client requests will be asynchronous
+        // Try reaching Primary. If unreachable, become primary
+        break;
     }
 }

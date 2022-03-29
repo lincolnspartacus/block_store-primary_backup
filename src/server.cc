@@ -1,8 +1,11 @@
 #include "block_server.h"
 #include "primarybackup_server.h"
+#include "primarybackup_client.h"
 #include "state_machine.h"
 #include <fcntl.h>
 #include <sys/stat.h>
+
+ PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 
 void sigintHandler(int sig_num)
 {
@@ -52,6 +55,13 @@ void run_server(char* loc)
     builder2.RegisterService(&service2);
     std::unique_ptr<Server> server2(builder2.BuildAndStart());
     std::cout << "Primary-Backup comm on " << SELF_IP << std::endl;
+
+    grpc::ChannelArguments ch_args;
+    ch_args.SetMaxReceiveMessageSize(INT_MAX);
+    ch_args.SetMaxSendMessageSize(INT_MAX);
+    g_RPCCLient = new PrimaryBackupRPCClient(grpc::CreateCustomChannel(OTHER_IP, grpc::InsecureChannelCredentials() , ch_args ));
+
+    StateMachine::initState(g_RPCCLient);
 
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.

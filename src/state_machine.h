@@ -1,3 +1,5 @@
+#include "primarybackup_client.h"
+
 enum ServerStates {
     STATE_START = 0,
     STATE_PRIMARY = 1,
@@ -6,5 +8,6 @@ enum ServerStates {
 
 namespace StateMachine {
     const enum ServerStates getState();
-    void loop();
+    void initState(PrimaryBackupRPCClient *g_RPCCLient);
+    void setState(enum ServerStates target_state);
 };
