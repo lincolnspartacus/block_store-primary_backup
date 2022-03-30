@@ -33,6 +33,7 @@ Status BlockRPCServiceImpl::ReadBlock(ServerContext *context, const ReadRequest 
 {
     std::cout << "[ReadBlock] Requested addr = " << request->address() << "\n";
 
+start:
     int cur_state = StateMachine::getState();
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually read from our 256gb file! @Himanshu
@@ -60,6 +61,7 @@ Status BlockRPCServiceImpl::ReadBlock(ServerContext *context, const ReadRequest 
         }
     } else if (cur_state == STATE_START) {
         // We are booting up. Wait ...
+        goto start;
     } else {
         std::cout << "FATAL ERROR! current state is unknown = " << cur_state;
         assert(0);
@@ -70,6 +72,45 @@ Status BlockRPCServiceImpl::ReadBlock(ServerContext *context, const ReadRequest 
 
 Status BlockRPCServiceImpl::WriteBlock(ServerContext *context, const WriteRequest *request, WriteResponse *reply)
 {
+    std::cout << "[WriteBlock] Requested addr = " << request->address() << "\n";
+    const uint8_t *buf = (const uint8_t *)(request->data().c_str());
+    for(int i = 0; i < 4096; ++i)
+        printf("%x ", buf[i]);
+    printf("\n");
+
+start:
+    int cur_state = StateMachine::getState();
+    if(cur_state == STATE_PRIMARY) {
+        // TODO: Actually write to our 256gb file! @Himanshu
+        // TODO: Send write to our backup
+        // TODO: If Backup is unavailable, log it
+        reply->set_responsecode(RESPONSE_SUCCESS);
+    } else if (cur_state == STATE_BACKUP) {
+        // Check if Primary server is alive
+        int other_state = otherServer_IsAlive();
+        if(other_state == -1) {
+            // Other server is dead. Become the primary? TODO: RACE CONDITION!!!!!!!
+        } else if(other_state == STATE_PRIMARY) {
+            // Redirect
+            reply->set_responsecode(RESPONSE_REDIRECT);
+        } else if (other_state == STATE_BACKUP) {
+            std::cout << "FATAL ERROR! Both servers are in STATE_BACKUP";
+            assert(0);
+        } else if (other_state == STATE_START) {
+            // Other server is booting up.. Wait for it and then redirect
+            reply->set_responsecode(RESPONSE_REDIRECT);
+        } else {
+            std::cout << "FATAL ERROR! Other state is unknown = " << other_state;
+            assert(0);
+        }
+    } else if (cur_state == STATE_START) {
+        // We are booting up. Wait ...
+        goto start;
+    } else {
+        std::cout << "FATAL ERROR! current state is unknown = " << cur_state;
+        assert(0);
+    }
+    
     return Status::OK;
 }
 
