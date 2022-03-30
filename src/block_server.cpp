@@ -18,6 +18,16 @@ Status BlockRPCServiceImpl::DoMessageInt(ServerContext *context, const MessageIn
     return Status::OK;
 }
 
+Status BlockRPCServiceImpl::ReadBlock(ServerContext *context, const ReadRequest *request, ReadResponse *reply)
+{
+    return Status::OK;
+}
+
+Status BlockRPCServiceImpl::WriteBlock(ServerContext *context, const WriteRequest *request, WriteResponse *reply)
+{
+    return Status::OK;
+}
+
 const string &BlockRPCServiceImpl::getFileStorePath() const {
     return mFileStore;
 }

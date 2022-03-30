@@ -5,8 +5,28 @@ message MessageInt {
   int32 value = 1;
 }
 
+message ReadRequest {
+  int64 address = 1;
+}
+
+message WriteRequest {
+  int64 address = 1;
+  bytes data = 2;
+}
+
+message ReadResponse {
+  int32 responseCode = 1;
+  bytes data = 2;
+}
+
+message WriteResponse {
+  int32 responseCode = 1;
+}
+
 service BlockRPC {
   rpc DoMessageInt (MessageInt) returns (MessageInt) {}
+  rpc ReadBlock(ReadRequest) returns (ReadResponse) {}
+  rpc WriteBlock(WriteRequest) returns (WriteResponse) {}
 }
 
 service PrimaryBackupRPC {

@@ -27,5 +27,9 @@ public:
 protected:
     Status DoMessageInt(ServerContext *context, const MessageInt *request
                                     ,MessageInt *reply) override;
+    Status ReadBlock(ServerContext *context, const ReadRequest *request,
+                                    ReadResponse *reply) override;
+    Status WriteBlock(ServerContext *context, const WriteRequest *request,
+                                    WriteResponse *reply) override;
 };
 #endif

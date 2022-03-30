@@ -1,0 +1,5 @@
+enum {
+    RESPONSE_SUCCESS = 0,
+    RESPONSE_FAIL = 1,
+    RESPONSE_REDIRECT = 2
+};

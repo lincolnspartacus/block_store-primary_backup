@@ -23,9 +23,13 @@ public:
     BlockRPCClient(std::shared_ptr<Channel> channel);
 
     int DoMessageInt(int in);
+    int ReadBlock(int64_t address, uint8_t *buf);
+    int WriteBlock(int64_t address, uint8_t *buf);
 
 private:
     std::unique_ptr<BlockRPC::Stub> stub_;
+    std::string ip_server1;
+    std::string ip_server2;
 };
 
 
