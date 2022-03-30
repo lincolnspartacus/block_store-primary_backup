@@ -5,6 +5,7 @@
 #include <sys/sendfile.h>
 
 using grpc::ServerWriter;
+using grpc::ClientWriter;
 
 PrimaryBackupRPCClient::PrimaryBackupRPCClient(std::shared_ptr<Channel> channel)
         : stub_(PrimaryBackupRPC::NewStub(channel))
@@ -70,26 +71,46 @@ int PrimaryBackupRPCClient::ReSync(const std::set<int64_t> &BlockSet)
     ClientContext context;
     WriteResponse response;
     WriteRequest request;
+    std::cout << "[PrimaryBackupRPCClient::ReSync] Inside here "<<std::endl;
 
     std::unique_ptr <ClientWriter<WriteRequest>> writer(
                 stub_->ReSync(&context, &response));
     for (auto it=BlockSet.begin(); it!=BlockSet.end(); ++it){
+        request.clear_data();
+        std::cout << "[PrimaryBackupRPCClient::ReSync] Writing Set value "<<*it<<std::endl;
+
         request.set_address(*it * 4096);
         char buf[4096];
         memset(buf,0xff,4096);
         request.set_data(std::string(buf,buf+4096));
         writer->Write(request);
     }
+    std::cout << "[PrimaryBackupRPCClient::ReSync] Writes Done "<<std::endl;
     writer->WritesDone();
     Status status = writer->Finish();
+    std::cout << "[PrimaryBackupRPCClient::ReSync] Writer Finish "<<std::endl;
 
     if(status.ok()){
-        std::cout << "Write to Backup complete "<<std::endl;
+        std::cout << "[Resync]::Write to Backup complete "<<std::endl;
+        return 0;
+    }
+    else{
+        std::cout << status.error_code() + ": " + status.error_message() << std::endl;
+        return -1;
+    }
+}
+
+int PrimaryBackupRPCClient::ReSyncRequest(){
+    std::cout << "[PrimaryBackupRPCClient::ReSyncRequest] Inside here "<<std::endl;
+
+    ClientContext context;
+    Empty empty_req;
+    Empty empty_resp;
+    Status status = stub_->ReSyncRequest(&context, empty_req, &empty_resp);
+    if(status.ok()){
         return 0;
     }
     else{
         return -1;
     }
-
-
 }

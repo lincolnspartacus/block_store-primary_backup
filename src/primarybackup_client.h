@@ -25,6 +25,7 @@ public:
     int GetState(int in);
     int WriteBlock(const WriteRequest *request);
     int ReSync(const std::set<int64_t> &BlockSet);
+    int ReSyncRequest();
 
 private:
     std::unique_ptr<PrimaryBackupRPC::Stub> stub_;

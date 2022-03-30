@@ -26,6 +26,9 @@ protected:
                                     WriteResponse *reply) override;
     Status ReSync(ServerContext* context, ServerReader<WriteRequest> *reader,
                     WriteResponse *response) override ;
+    Status ReSyncRequest(ServerContext *context, const Empty *request
+                                    ,Empty *reply) override;
+
 
 };
 #endif

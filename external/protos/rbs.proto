@@ -23,6 +23,8 @@ message WriteResponse {
   int32 responseCode = 1;
 }
 
+message Empty{
+}
 service BlockRPC {
   rpc DoMessageInt (MessageInt) returns (MessageInt) {}
   rpc ReadBlock(ReadRequest) returns (ReadResponse) {}
@@ -33,4 +35,5 @@ service PrimaryBackupRPC {
   rpc GetState (MessageInt) returns (MessageInt) {}
   rpc WriteBlock(WriteRequest) returns (WriteResponse) {}
   rpc ReSync(stream WriteRequest) returns (WriteResponse) {}
+  rpc ReSyncRequest(Empty) returns (Empty) {}
 }

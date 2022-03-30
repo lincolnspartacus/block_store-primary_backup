@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+extern std::set<int64_t> BlockSet;
 extern PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 
 Status PrimaryBackupRPCServiceImpl::GetState(ServerContext *context, const MessageInt *request,
@@ -35,8 +36,8 @@ Status PrimaryBackupRPCServiceImpl::WriteBlock(ServerContext *context, const Wri
 
 Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, ServerReader<WriteRequest> *reader, WriteResponse *response) {
     
+    std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Inside here "<<std::endl;
     WriteRequest request;
-    std::cout << "Resync" << std::endl;
     while (reader->Read(&request)) {
         std::cout << "Address :  " << request.address(); 
         const uint8_t *buf = (const uint8_t *)(request.data().c_str());
@@ -44,6 +45,13 @@ Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, ServerReader<
             printf("%x ", buf[i]);
         printf("\n");
     }
+    Status status = reader->Finish();
+    
+    return Status::OK;
+}
 
+Status PrimaryBackupRPCServiceImpl::ReSyncRequest(ServerContext *context, const Empty *request ,Empty *reply) {
+    std::cout << "[PrimaryBackupRPCServiceImpl::ReSyncRequest] Inside here "<<std::endl;
+    g_RPCCLient->ReSync(BlockSet);
     return Status::OK;
 }
