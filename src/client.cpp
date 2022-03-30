@@ -15,9 +15,17 @@ int main(int argc, char *argv[])
   ch_args.SetMaxReceiveMessageSize(INT_MAX);
   ch_args.SetMaxSendMessageSize(INT_MAX);
   g_RPCCLient =  new BlockRPCClient ( grpc::CreateCustomChannel(target_str, grpc::InsecureChannelCredentials() , ch_args ) ); 
-  int sent = 10;
-  int answer = g_RPCCLient->DoMessageInt(sent);
-  printf("Sent is %d\n",sent);
-  printf("Reply is %d\n",answer);
+
+  uint8_t *buf = new uint8_t[4096];
+  // int answer = g_RPCCLient->ReadBlock(56, buf);
+
+  // printf("Ret = %d\n", answer);
+  // for(int i = 0; i < 4096; ++i)
+  //   printf("%x ", buf[i]);
+
+  memset(buf, 0xff, 4096);
+  int answer = g_RPCCLient->WriteBlock(67, buf);
+  printf("Ret = %d\n", answer);
+
   return 0;
 }

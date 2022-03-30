@@ -61,6 +61,7 @@ start:
         }
     } else if (cur_state == STATE_START) {
         // We are booting up. Wait ...
+        std::cout << "Server booting up, please wait. Retrying..\n";
         goto start;
     } else {
         std::cout << "FATAL ERROR! current state is unknown = " << cur_state;
@@ -82,8 +83,15 @@ start:
     int cur_state = StateMachine::getState();
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually write to our 256gb file! @Himanshu
-        // TODO: Send write to our backup
         // TODO: If Backup is unavailable, log it
+
+        // Send the same request to our backup
+        int ret = g_RPCCLient->WriteBlock(request);
+        if(ret == -1) {
+            // TODO: Log the request!
+            std::cout << "[WriteBlock] Backup is dead! Logging request..\n";
+        }
+
         reply->set_responsecode(RESPONSE_SUCCESS);
     } else if (cur_state == STATE_BACKUP) {
         // Check if Primary server is alive
@@ -105,6 +113,7 @@ start:
         }
     } else if (cur_state == STATE_START) {
         // We are booting up. Wait ...
+        std::cout << "Server booting up, please wait. Retrying..\n";
         goto start;
     } else {
         std::cout << "FATAL ERROR! current state is unknown = " << cur_state;

@@ -23,6 +23,7 @@ public:
     PrimaryBackupRPCClient(std::shared_ptr<Channel> channel);
 
     int GetState(int in);
+    int WriteBlock(const WriteRequest *request);
 
 private:
     std::unique_ptr<PrimaryBackupRPC::Stub> stub_;

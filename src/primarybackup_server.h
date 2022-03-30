@@ -22,5 +22,7 @@ public:
 protected:
     Status GetState(ServerContext *context, const MessageInt *request
                                     ,MessageInt *reply) override;
+    Status WriteBlock(ServerContext *context, const WriteRequest *request,
+                                    WriteResponse *reply) override;
 };
 #endif

@@ -11,6 +11,26 @@ PrimaryBackupRPCClient::PrimaryBackupRPCClient(std::shared_ptr<Channel> channel)
     return;
 }
 
+/*
+ * Used by Primary --------> Backup  for replication
+ */
+int PrimaryBackupRPCClient::WriteBlock(const WriteRequest *request)
+{
+    ClientContext context;
+    WriteResponse reply;
+    Status status = stub_->WriteBlock(&context, *request, &reply);
+
+    // Act upon its status.
+    if (status.ok())
+    {
+        // Written to Backup successfully
+        return 0;
+    } else {
+        // Return -1 if the Backup is dead.
+        return -1;
+    }
+}
+
 int PrimaryBackupRPCClient::GetState(int in)
 {
     // Data we are sending to the server.
