@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <cassert>
+#include <unistd.h>
 
 extern PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 
@@ -20,11 +21,16 @@ static int otherServer_IsAlive()
 BlockRPCServiceImpl::BlockRPCServiceImpl(const std::string& fileStore)
 {
     mFileStore = fileStore;
+    fd =  open(mFileStore, O_RDWR, 0777);
+    if(fd==-1){
+        std::cout << "Error opening block storage" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 Status BlockRPCServiceImpl::DoMessageInt(ServerContext *context, const MessageInt *request,
                                         MessageInt *reply) {
     const int output = request->value() * 2;
-    std::cout << "[server] " << request->value() << " -> " << output << "\n";
+    std::cout << "[server] " << request->value() << " -> " << output << " " << std::endl;
     reply->set_value(output);
     return Status::OK;
 }
@@ -38,7 +44,12 @@ start:
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually read from our 256gb file! @Himanshu
         uint8_t buf[4096];
-        memset(buf, 0xff, 4096);
+        if(pread(this->fd, buf, 4096, request->address())==-1){
+            std::cout << "Error reading block storage at offset "<< request->address() << " " << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        
+        //memset(buf, 0xff, 4096);
         reply->set_data(std::string(buf, buf + 4096));
         reply->set_responsecode(RESPONSE_SUCCESS);
     } else if (cur_state == STATE_BACKUP) {
@@ -75,15 +86,21 @@ Status BlockRPCServiceImpl::WriteBlock(ServerContext *context, const WriteReques
 {
     std::cout << "[WriteBlock] Requested addr = " << request->address() << "\n";
     const uint8_t *buf = (const uint8_t *)(request->data().c_str());
-    for(int i = 0; i < 4096; ++i)
-        printf("%x ", buf[i]);
-    printf("\n");
+    //for(int i = 0; i < 4096; ++i)
+    //    printf("%x ", buf[i]);
+    //printf("\n");
 
 start:
     int cur_state = StateMachine::getState();
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually write to our 256gb file! @Himanshu
         // TODO: If Backup is unavailable, log it
+        
+        if(pwrite(this->fd, buf, 4096, request->address())==-1){
+            std::cout << "Error writing to block storage at offset "<< request->address() << " " << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        fsync(this->fd);
 
         // Send the same request to our backup
         int ret = g_RPCCLient->WriteBlock(request);

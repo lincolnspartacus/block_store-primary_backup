@@ -19,6 +19,7 @@ class BlockRPCServiceImpl final : public BlockRPC::Service
 private:
     BlockRPCServiceImpl() { };
     std::string mFileStore;
+    int fd;
 public:
     BlockRPCServiceImpl(const std::string& fileStore);
     const string &getFileStorePath() const;
