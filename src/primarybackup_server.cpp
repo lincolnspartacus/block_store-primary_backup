@@ -32,3 +32,18 @@ Status PrimaryBackupRPCServiceImpl::WriteBlock(ServerContext *context, const Wri
 
     return Status::OK;
 }
+
+Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, ServerReader<WriteRequest> *reader, WriteResponse *response) {
+    
+    WriteRequest request;
+    std::cout << "Resync" << std::endl;
+    while (reader->Read(&request)) {
+        std::cout << "Address :  " << request.address(); 
+        const uint8_t *buf = (const uint8_t *)(request.data().c_str());
+        for(int i = 0; i < 4096; ++i)
+            printf("%x ", buf[i]);
+        printf("\n");
+    }
+
+    return Status::OK;
+}

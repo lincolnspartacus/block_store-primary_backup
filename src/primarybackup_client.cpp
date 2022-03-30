@@ -4,6 +4,7 @@
 #include <cstring>
 #include <sys/sendfile.h>
 
+using grpc::ServerWriter;
 
 PrimaryBackupRPCClient::PrimaryBackupRPCClient(std::shared_ptr<Channel> channel)
         : stub_(PrimaryBackupRPC::NewStub(channel))
@@ -64,3 +65,31 @@ int PrimaryBackupRPCClient::GetState(int in)
     }
 }
 
+int PrimaryBackupRPCClient::ReSync(const std::set<int64_t> &BlockSet)
+{
+    ClientContext context;
+    WriteResponse response;
+    WriteRequest request;
+
+    std::unique_ptr <ClientWriter<WriteRequest>> writer(
+                stub_->ReSync(&context, &response));
+    for (auto it=BlockSet.begin(); it!=BlockSet.end(); ++it){
+        request.set_address(*it * 4096);
+        char buf[4096];
+        memset(buf,0xff,4096);
+        request.set_data(std::string(buf,buf+4096));
+        writer->Write(request);
+    }
+    writer->WritesDone();
+    Status status = writer->Finish();
+
+    if(status.ok()){
+        std::cout << "Write to Backup complete "<<std::endl;
+        return 0;
+    }
+    else{
+        return -1;
+    }
+
+
+}

@@ -25,6 +25,7 @@ public:
     const string &getFileStorePath() const;
     void setFileStorePath(const string &fileStorePath);
 
+
 protected:
     Status DoMessageInt(ServerContext *context, const MessageInt *request
                                     ,MessageInt *reply) override;

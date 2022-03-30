@@ -32,4 +32,5 @@ service BlockRPC {
 service PrimaryBackupRPC {
   rpc GetState (MessageInt) returns (MessageInt) {}
   rpc WriteBlock(WriteRequest) returns (WriteResponse) {}
+  rpc ReSync(stream WriteRequest) returns (WriteResponse) {}
 }

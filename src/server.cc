@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string>
 
+extern std::set<int64_t> BlockSet;
 PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 
 void sigintHandler(int sig_num)
@@ -28,7 +29,7 @@ void mountdir(char* root, long size){
     unsigned long long int X;
     X = bytes*bytes*bytes*size - 1;
     //unsigned long long int X =  274877906943;
-    FILE *fp = fopen("/mnt/sda4/data", "w");
+    FILE *fp = fopen("/users/pandotra/tmp/data", "w");
     fseek(fp, X , SEEK_SET);
     fputc('\0', fp);
     fclose(fp);
@@ -73,7 +74,9 @@ void run_server(char* loc)
     g_RPCCLient = new PrimaryBackupRPCClient(grpc::CreateCustomChannel(OTHER_IP, grpc::InsecureChannelCredentials() , ch_args ));
 
     StateMachine::initState(g_RPCCLient);
-
+    if(StateMachine::getState() == STATE_BACKUP){
+        g_RPCCLient->ReSync(BlockSet);
+    }
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
     server->Wait();
@@ -83,24 +86,24 @@ void run_server(char* loc)
 int main(int argc, char* argv[])
 {
     char* mountpoint;
-    mountpoint = strdup("/mnt/sda4/data");
-    if(argc<=1){
-        std::cout<<"Usage: $./server 1  for New Block Storage OR $./server 0  for existing block storage "<<std::endl;
-        exit(0);
-    }
-    if (argc>1){
-        if (argv[1]=='1'){
-            long size = 256;
-            if (argc==3){
+    mountpoint = strdup("/users/pandotra/tmp/data");
+    // if(argc<=1){
+    //     std::cout<<"Usage: $./server 1  for New Block Storage OR $./server 0  for existing block storage "<<std::endl;
+    //     exit(0);
+    // }
+    // if (argc>1){
+    //     if (argv[1][0]=='1'){
+    //         long size = 256;
+    //         if (argc==3){
 
-                char *p;
-                size = strtol(argv[2], &p, 10);
-            }
-            mountdir(mountpoint,size)
-        }
-    }
+    //             char *p;
+    //             size = strtol(argv[2], &p, 10);
+    //         }
+    //         mountdir(mountpoint,size);
+    //     }
+    // }
     
-
-    signal(SIGINT, sigintHandler);
+    mountdir(mountpoint,256);
+    //signal(SIGINT, sigintHandler);
     run_server(mountpoint);
 }
