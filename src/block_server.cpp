@@ -18,6 +18,23 @@ static int otherServer_IsAlive()
     return state_other;
 }
 
+void read(uint8_t *buf, unsigned long long address){
+
+        if(pread(this->fd, buf, 4096, address)==-1){
+            std::cout << "Error reading block storage at offset "<< request->address() << " " << std::endl;
+            exit(EXIT_FAILURE);
+        }
+}
+
+void write(uint8_t *buf, unsigned long long address){
+
+        if(pwrite(this->fd, buf, 4096, address)==-1){
+            std::cout << "Error writing to block storage at offset "<< request->address() << " " << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        fsync(this->fd);
+}
+
 BlockRPCServiceImpl::BlockRPCServiceImpl(const std::string& fileStore)
 {
     mFileStore = fileStore;
@@ -43,11 +60,9 @@ start:
     int cur_state = StateMachine::getState();
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually read from our 256gb file! @Himanshu
+        
         uint8_t buf[4096];
-        if(pread(this->fd, buf, 4096, request->address())==-1){
-            std::cout << "Error reading block storage at offset "<< request->address() << " " << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        read(buf,request->address());
         
         //memset(buf, 0xff, 4096);
         reply->set_data(std::string(buf, buf + 4096));
@@ -94,14 +109,10 @@ start:
     int cur_state = StateMachine::getState();
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually write to our 256gb file! @Himanshu
-        // TODO: If Backup is unavailable, log it
         
-        if(pwrite(this->fd, buf, 4096, request->address())==-1){
-            std::cout << "Error writing to block storage at offset "<< request->address() << " " << std::endl;
-            exit(EXIT_FAILURE);
-        }
-        fsync(this->fd);
-
+        write(buf,request->address());
+        
+        // TODO: If Backup is unavailable, log it
         // Send the same request to our backup
         int ret = g_RPCCLient->WriteBlock(request);
         if(ret == -1) {

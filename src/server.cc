@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
+#include <string>
 
 PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 
@@ -20,16 +21,17 @@ void sigintHandler(int sig_num)
     std::exit(0);
 }
 
-void mountdir(char* root){
+void mountdir(char* root, long size){
     
     //256 GB
-    unsigned long long int X =  274877906943;
+    unsigned long long int bytes = 1024;
+    unsigned long long int X;
+    X = bytes*bytes*bytes*size - 1;
+    //unsigned long long int X =  274877906943;
     FILE *fp = fopen("/mnt/sda4/data", "w");
     fseek(fp, X , SEEK_SET);
     fputc('\0', fp);
     fclose(fp);
-    //int res = mkdir(root, 0777);
-    //int res = mkdir(root, S_IRWXU | S_IRWXG | S_IRWXO);
     printf("Filesystem mounted on %s\n",root);
 }
 
@@ -83,14 +85,21 @@ int main(int argc, char* argv[])
     char* mountpoint;
     mountpoint = strdup("/mnt/sda4/data");
     if(argc<=1){
-        std::cout<<"Usage: $./server 1 for new block storage OR $./server 0  for existing block storage "<<std::endl;
+        std::cout<<"Usage: $./server 1  for New Block Storage OR $./server 0  for existing block storage "<<std::endl;
         exit(0);
     }
     if (argc>1){
         if (argv[1]=='1'){
-            mountdir(mountpoint)
+            long size = 256;
+            if (argc==3){
+
+                char *p;
+                size = strtol(argv[2], &p, 10);
+            }
+            mountdir(mountpoint,size)
         }
     }
+    
 
     signal(SIGINT, sigintHandler);
     run_server(mountpoint);
