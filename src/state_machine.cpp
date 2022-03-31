@@ -1,4 +1,5 @@
 #include "state_machine.h"
+#include "locks.h"
 
 static enum ServerStates state = STATE_START; // Default state is START
 
@@ -19,21 +20,25 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
     int state_other, ret;
     switch(state) {
         case STATE_START:
+        pthread_mutex_lock(&BACKUP_TRANSITION_LOCK);
         state_other = g_RPCCLient->GetState(5);
 
         if (state_other == -1) {
+            pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
             setState(STATE_PRIMARY); // If no response from other server, become the PRIMARY
         } else if (state_other == STATE_START) {
+            pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
             setState(DEFAULT_ROLE); // Fed in from CMakeLists.txt as a -D compiler constant
         } else if (state_other == STATE_PRIMARY) {
+            pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
             // We become the backup after RESYNCING
             ret = g_RPCCLient->ReSync();
             assert(ret == 0);
             setState(STATE_BACKUP);
         } else if (state_other == STATE_BACKUP) {
-            // Become the primary
-            // TODO : Ensure we don't have 2 PRIMARIES
+            // Become the primary; ensure we don't have 2 PRIMARIES
             setState(STATE_PRIMARY);
+            pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
         }
         break;
 
