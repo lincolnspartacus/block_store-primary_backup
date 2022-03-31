@@ -27,6 +27,8 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
             setState(STATE_PRIMARY); // If no response from other server, become the PRIMARY
             pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
         } else if (state_other == STATE_START) {
+            // TODO : Fix Race Condition here. What if both servers have acquired their
+            // BACKUP_TRANSITION_LOCKs and now both call GetState() RPCs. HANG!
             pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
             setState(DEFAULT_ROLE); // Fed in from CMakeLists.txt as a -D compiler constant
         } else if (state_other == STATE_PRIMARY) {
