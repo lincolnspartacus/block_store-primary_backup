@@ -74,9 +74,7 @@ void run_server(char* loc)
     g_RPCCLient = new PrimaryBackupRPCClient(grpc::CreateCustomChannel(OTHER_IP, grpc::InsecureChannelCredentials() , ch_args ));
 
     StateMachine::initState(g_RPCCLient);
-    if(StateMachine::getState() == STATE_BACKUP){
-        g_RPCCLient->ReSync();
-    }
+
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
     server->Wait();

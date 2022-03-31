@@ -16,7 +16,7 @@ void StateMachine::setState(enum ServerStates target_state)
 
 void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
 {
-    int state_other;
+    int state_other, ret;
     switch(state) {
         case STATE_START:
         state_other = g_RPCCLient->GetState(5);
@@ -26,8 +26,9 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
         } else if (state_other == STATE_START) {
             setState(DEFAULT_ROLE); // Fed in from CMakeLists.txt as a -D compiler constant
         } else if (state_other == STATE_PRIMARY) {
-            // We become the backup
-            // TODO: Get log of operations from PRIMARY
+            // We become the backup after RESYNCING
+            ret = g_RPCCLient->ReSync();
+            assert(ret == 0);
             setState(STATE_BACKUP);
         } else if (state_other == STATE_BACKUP) {
             // Become the primary
@@ -37,8 +38,7 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
         break;
 
         case STATE_PRIMARY:
-        // Just process requests here
-        // TODO: Keep log of requests in case BACKUP is dead
+        // Just process requests here, keep log of requests in case BACKUP is dead
         break;
 
         case STATE_BACKUP:
