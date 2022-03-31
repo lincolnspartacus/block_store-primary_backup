@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 #include "block_server.h"
 #include "primarybackup_client.h"
+#include "locks.h"
 #include "state_machine.h"
 #include "response_codes.h"
 #include <fcntl.h>
@@ -27,7 +28,7 @@ static int otherServer_IsAlive()
     return state_other;
 }
 
-void read(int fd,uint8_t *buf, unsigned long long address){
+void local_read(int fd, uint8_t *buf, unsigned long long address){
 
         if(pread(fd, buf, 4096, address)==-1){
             std::cout << "Error reading block storage at offset "<<address << " " << std::endl;
@@ -35,7 +36,7 @@ void read(int fd,uint8_t *buf, unsigned long long address){
         }
 }
 
-void write(int fd,uint8_t *buf, unsigned long long address){
+void local_write(int fd, const uint8_t *buf, unsigned long long address){
 
         if(pwrite(fd, buf, 4096, address)==-1){
             std::cout << "Error writing to block storage at offset "<< address << " " << std::endl;
@@ -71,7 +72,7 @@ start:
         // TODO: Actually read from our 256gb file! @Himanshu
         
         uint8_t buf[4096];
-        read(fd,buf,request->address());
+        local_read(fd,buf,request->address());
         
         //memset(buf, 0xff, 4096);
         reply->set_data(std::string(buf, buf + 4096));
@@ -108,6 +109,11 @@ start:
 
 Status BlockRPCServiceImpl::WriteBlock(ServerContext *context, const WriteRequest *request, WriteResponse *reply)
 {
+    // Stall all writes until Resync is complete!
+    std::cout << "[BlockRPCServiceImpl::WriteBlock] Trying to acquire RESYNC_LOCK\n";
+    pthread_mutex_lock(&RESYNC_LOCK);
+    std::cout << "[BlockRPCServiceImpl::WriteBlock] Acquired RESYNC_LOCK!\n";
+
     std::cout << "[WriteBlock] Requested addr = " << request->address() << "\n";
     const uint8_t *buf = (const uint8_t *)(request->data().c_str());
     //for(int i = 0; i < 4096; ++i)
@@ -119,7 +125,7 @@ start:
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually write to our 256gb file! @Himanshu
         
-        write(fd,buf,request->address());
+        local_write(fd,buf,request->address());
         
         // TODO: Have a global state for the other server - logging
         // Send the same request to our backup
@@ -157,6 +163,7 @@ start:
         assert(0);
     }
     
+    pthread_mutex_unlock(&RESYNC_LOCK);
     return Status::OK;
 }
 

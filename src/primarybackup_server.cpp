@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 #include "primarybackup_server.h"
 #include "primarybackup_client.h"
+#include "locks.h"
 #include "state_machine.h"
 #include <fcntl.h>
 #include <time.h>
@@ -36,6 +37,8 @@ Status PrimaryBackupRPCServiceImpl::WriteBlock(ServerContext *context, const Wri
 
 Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, const Empty *empty_req, ServerWriter<WriteRequest> *writer) {
     
+    pthread_mutex_lock(&RESYNC_LOCK);
+
     std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Inside here "<<std::endl;
     WriteRequest request;
 
@@ -49,5 +52,7 @@ Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, const Empty *
     }
 
     std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Primary side resync done" << endl;
+
+    pthread_mutex_unlock(&RESYNC_LOCK);
     return Status::OK;
 }
