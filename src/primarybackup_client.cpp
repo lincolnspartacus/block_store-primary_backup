@@ -66,51 +66,30 @@ int PrimaryBackupRPCClient::GetState(int in)
     }
 }
 
-int PrimaryBackupRPCClient::ReSync(const std::set<int64_t> &BlockSet)
+int PrimaryBackupRPCClient::ReSync()
 {
     ClientContext context;
-    WriteResponse response;
     WriteRequest request;
+    Empty emptyReq;
+
+    std::unique_ptr <ClientReader<WriteRequest>> reader(stub_->ReSync(&context, emptyReq));
+
     std::cout << "[PrimaryBackupRPCClient::ReSync] Inside here "<<std::endl;
 
-    std::unique_ptr <ClientWriter<WriteRequest>> writer(
-                stub_->ReSync(&context, &response));
-    for (auto it=BlockSet.begin(); it!=BlockSet.end(); ++it){
-        request.clear_data();
-        std::cout << "[PrimaryBackupRPCClient::ReSync] Writing Set value "<<*it<<std::endl;
-
-        request.set_address(*it * 4096);
-        char buf[4096];
-        memset(buf,0xff,4096);
-        request.set_data(std::string(buf,buf+4096));
-        writer->Write(request);
+    while (reader->Read(&request)) {
+        std::cout << "Address :  " << request.address() << "\n"; 
+        const uint8_t *buf = (const uint8_t *)(request.data().c_str());
+        for(int i = 0; i < 4096; ++i)
+            printf("%x ", buf[i]);
+        printf("\n");
     }
-    std::cout << "[PrimaryBackupRPCClient::ReSync] Writes Done "<<std::endl;
-    writer->WritesDone();
-    Status status = writer->Finish();
-    std::cout << "[PrimaryBackupRPCClient::ReSync] Writer Finish "<<std::endl;
-
+    Status status = reader->Finish();
     if(status.ok()){
-        std::cout << "[Resync]::Write to Backup complete "<<std::endl;
+        std::cout << "[PrimaryBackupRPCClient::ReSync] Resync finished! "<<std::endl;
         return 0;
     }
     else{
         std::cout << status.error_code() + ": " + status.error_message() << std::endl;
-        return -1;
-    }
-}
-
-int PrimaryBackupRPCClient::ReSyncRequest(){
-    std::cout << "[PrimaryBackupRPCClient::ReSyncRequest] Inside here "<<std::endl;
-
-    ClientContext context;
-    Empty empty_req;
-    Empty empty_resp;
-    Status status = stub_->ReSyncRequest(&context, empty_req, &empty_resp);
-    if(status.ok()){
-        return 0;
-    }
-    else{
         return -1;
     }
 }

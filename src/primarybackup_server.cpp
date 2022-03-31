@@ -34,24 +34,20 @@ Status PrimaryBackupRPCServiceImpl::WriteBlock(ServerContext *context, const Wri
     return Status::OK;
 }
 
-Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, ServerReader<WriteRequest> *reader, WriteResponse *response) {
+Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, const Empty *empty_req, ServerWriter<WriteRequest> *writer) {
     
     std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Inside here "<<std::endl;
     WriteRequest request;
-    while (reader->Read(&request)) {
-        std::cout << "Address :  " << request.address(); 
-        const uint8_t *buf = (const uint8_t *)(request.data().c_str());
-        for(int i = 0; i < 4096; ++i)
-            printf("%x ", buf[i]);
-        printf("\n");
-    }
-    Status status = reader->Finish();
-    
-    return Status::OK;
-}
 
-Status PrimaryBackupRPCServiceImpl::ReSyncRequest(ServerContext *context, const Empty *request ,Empty *reply) {
-    std::cout << "[PrimaryBackupRPCServiceImpl::ReSyncRequest] Inside here "<<std::endl;
-    g_RPCCLient->ReSync(BlockSet);
+    for (auto it=BlockSet.begin(); it!=BlockSet.end(); ++it){
+        request.clear_data();
+        request.set_address(*it * 4096);
+        char buf[4096];
+        memset(buf,0xff,4096);
+        request.set_data(std::string(buf,buf+4096));
+        writer->Write(request);
+    }
+
+    std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Primary side resync done" << endl;
     return Status::OK;
 }

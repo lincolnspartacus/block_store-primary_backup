@@ -24,11 +24,7 @@ protected:
                                     ,MessageInt *reply) override;
     Status WriteBlock(ServerContext *context, const WriteRequest *request,
                                     WriteResponse *reply) override;
-    Status ReSync(ServerContext* context, ServerReader<WriteRequest> *reader,
-                    WriteResponse *response) override ;
-    Status ReSyncRequest(ServerContext *context, const Empty *request
-                                    ,Empty *reply) override;
-
-
+    Status ReSync(ServerContext* context, const Empty *empty_req,
+                    ServerWriter<WriteRequest> *writer) override ;
 };
 #endif

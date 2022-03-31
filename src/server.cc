@@ -75,7 +75,7 @@ void run_server(char* loc)
 
     StateMachine::initState(g_RPCCLient);
     if(StateMachine::getState() == STATE_BACKUP){
-        g_RPCCLient->ReSyncRequest();
+        g_RPCCLient->ReSync();
     }
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
