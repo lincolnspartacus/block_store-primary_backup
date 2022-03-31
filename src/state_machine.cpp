@@ -24,8 +24,8 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
         state_other = g_RPCCLient->GetState(5);
 
         if (state_other == -1) {
-            pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
             setState(STATE_PRIMARY); // If no response from other server, become the PRIMARY
+            pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
         } else if (state_other == STATE_START) {
             pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
             setState(DEFAULT_ROLE); // Fed in from CMakeLists.txt as a -D compiler constant
