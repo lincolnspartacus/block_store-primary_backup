@@ -1,5 +1,6 @@
 #include "state_machine.h"
 #include "locks.h"
+#include <unistd.h>
 
 static enum ServerStates state = STATE_START; // Default state is START
 
@@ -20,6 +21,8 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
     int state_other, ret;
     switch(state) {
         case STATE_START:
+        if(DEFAULT_ROLE == STATE_PRIMARY)
+            sleep(2);
         pthread_mutex_lock(&BACKUP_TRANSITION_LOCK);
         state_other = g_RPCCLient->GetState(5);
 
@@ -27,8 +30,9 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
             setState(STATE_PRIMARY); // If no response from other server, become the PRIMARY
             pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
         } else if (state_other == STATE_START) {
-            // TODO : Fix Race Condition here. What if both servers have acquired their
+            // Race Condition here! What if both servers have acquired their
             // BACKUP_TRANSITION_LOCKs and now both call GetState() RPCs. HANG!
+            // That's why add a sleep(2) in case STATE_START to break the contention.
             pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
             setState(DEFAULT_ROLE); // Fed in from CMakeLists.txt as a -D compiler constant
         } else if (state_other == STATE_PRIMARY) {
