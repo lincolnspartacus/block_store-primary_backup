@@ -7,7 +7,9 @@
 #include <time.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include "local_read_write.h"
 
+extern int FD;
 extern std::set<int64_t> BlockSet;
 extern PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 
@@ -32,6 +34,7 @@ Status PrimaryBackupRPCServiceImpl::WriteBlock(ServerContext *context, const Wri
     for(int i = 0; i < 4096; ++i)
         printf("%x ", buf[i]);
     printf("\n");
+    local_write(FD,buf,request->address());
 
 
     return Status::OK;

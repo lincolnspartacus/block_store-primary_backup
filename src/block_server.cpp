@@ -10,10 +10,11 @@
 #include <dirent.h>
 #include <cassert>
 #include <unistd.h>
+#include "local_read_write.h"
 
 extern PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 std::set<int64_t> BlockSet;
-
+int FD;
 void printChannelState()
 {
     auto state = g_RPCCLient->channel->GetState(true);
@@ -53,27 +54,11 @@ static int otherServer_IsAlive()
     return state_other;
 }
 
-void local_read(int fd, uint8_t *buf, unsigned long long address){
-
-        if(pread(fd, buf, 4096, address)==-1){
-            std::cout << "Error reading block storage at offset "<<address << " " << std::endl;
-            exit(EXIT_FAILURE);
-        }
-}
-
-void local_write(int fd, const uint8_t *buf, unsigned long long address){
-
-        if(pwrite(fd, buf, 4096, address)==-1){
-            std::cout << "Error writing to block storage at offset "<< address << " " << std::endl;
-            exit(EXIT_FAILURE);
-        }
-        fsync(fd);
-}
-
 BlockRPCServiceImpl::BlockRPCServiceImpl(const std::string& fileStore)
 {
     mFileStore = fileStore;
     fd =  open(mFileStore.c_str(), O_RDWR, 0777);
+    FD = fd;
     if(fd==-1){
         std::cout << "Error opening block storage" << std::endl;
         exit(EXIT_FAILURE);

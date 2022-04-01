@@ -3,10 +3,12 @@
 #include <fcntl.h>
 #include <cstring>
 #include <sys/sendfile.h>
+#include "local_read_write.h"
 
 using grpc::ServerWriter;
 using grpc::ClientWriter;
 
+extern int FD;
 PrimaryBackupRPCClient::PrimaryBackupRPCClient(std::shared_ptr<Channel> c)
         :channel(c), stub_(PrimaryBackupRPC::NewStub(channel))
 {   
@@ -89,6 +91,8 @@ int PrimaryBackupRPCClient::ReSync()
         for(int i = 0; i < 4096; ++i)
             printf("%x ", buf[i]);
         printf("\n");
+        local_write(FD,buf,request.address());
+
     }
     Status status = reader->Finish();
     if(status.ok()){

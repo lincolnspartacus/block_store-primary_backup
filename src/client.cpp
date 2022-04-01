@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
   // for(int i = 0; i < 4096; ++i)
   //   printf("%x ", buf[i]);
 
-  memset(buf, 0xff, 4096);
+  memset(buf, 65, 4096);
   int answer = gRPCClient->WriteBlock(67, buf);
   printf("Write Ret = %d\n", answer);
 
