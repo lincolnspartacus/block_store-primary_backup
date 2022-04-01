@@ -137,6 +137,8 @@ start:
 
         local_write(fd,buf,request->address());
         
+        int other_state = otherServer_IsAlive();
+        std::cout << "[BlockRPCServiceImpl::WriteBlock] Other State = " << other_state << "\n";
         // TODO: Have a global state for the other server - logging
         // Send the same request to our backup
         int ret = g_RPCCLient->WriteBlock(request);

@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
 
   RPCClientLibrary *gRPCClient = new RPCClientLibrary(serverString);
 
-  int sent = 10;
-  int answer = gRPCClient->DoMessageInt(sent);
+  // int sent = 10;
+  // int answer = gRPCClient->DoMessageInt(sent);
 
-  printf("Sent is %d\n", sent);
-  printf("Reply is %d\n", answer);
+  // printf("Sent is %d\n", sent);
+  // printf("Reply is %d\n", answer);
 
   printf("Testing read & write: \n");
   uint8_t *buf = new uint8_t[4096];
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
   //   printf("%x ", buf[i]);
 
   memset(buf, 0xff, 4096);
-  answer = gRPCClient->WriteBlock(67, buf);
+  int answer = gRPCClient->WriteBlock(67, buf);
   printf("Write Ret = %d\n", answer);
 
   return 0;

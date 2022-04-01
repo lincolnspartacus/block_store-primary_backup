@@ -16,19 +16,26 @@ PrimaryBackupRPCClient::PrimaryBackupRPCClient(std::shared_ptr<Channel> channel)
 /*
  * Used by Primary --------> Backup  for replication
  */
-int PrimaryBackupRPCClient::WriteBlock(const WriteRequest *request)
+int PrimaryBackupRPCClient::WriteBlock(const WriteRequest *original_request)
 {
     ClientContext context;
+    WriteRequest request;
+    request.set_address(original_request->address());
+    request.set_data(original_request->data());
     WriteResponse reply;
-    Status status = stub_->WriteBlock(&context, *request, &reply);
+    Status status = stub_->WriteBlock(&context, request, &reply);
 
     // Act upon its status.
     if (status.ok())
     {
         // Written to Backup successfully
+        std::cout << "[PrimaryBackupRPCClient::WriteBlock] Written to Backup!\n";
         return 0;
     } else {
         // Return -1 if the Backup is dead.
+        std::cout << "[PrimaryBackupRPCClient::WriteBlock] Couldn't replicate WRITE\n";
+        std::cout << "[PrimaryBackupRPCClient::WriteBlock]" << status.error_code() << ": " 
+                  << status.error_message() << std::endl;
         return -1;
     }
 }
