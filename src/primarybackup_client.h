@@ -20,7 +20,8 @@ class PrimaryBackupRPCClient
 {
 
 public:
-    PrimaryBackupRPCClient(std::shared_ptr<Channel> channel);
+    PrimaryBackupRPCClient(std::shared_ptr<Channel> c);
+    std::shared_ptr<Channel> channel;
 
     int GetState(int in);
     int WriteBlock(const WriteRequest *request);
@@ -28,6 +29,7 @@ public:
 
 private:
     std::unique_ptr<PrimaryBackupRPC::Stub> stub_;
+    
 };
 
 

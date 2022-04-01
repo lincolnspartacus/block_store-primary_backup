@@ -56,5 +56,10 @@ Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, const Empty *
     std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Primary side resync done" << endl;
 
     pthread_mutex_unlock(&RESYNC_LOCK);
+    //Recreate channel when backup is online and delete the old channel
+    auto tmp = g_RPCCLient;
+    g_RPCCLient = new PrimaryBackupRPCClient(grpc::CreateChannel(OTHER_IP, grpc::InsecureChannelCredentials()));
+    delete tmp;
+        
     return Status::OK;
 }

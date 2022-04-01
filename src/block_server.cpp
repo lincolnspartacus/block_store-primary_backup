@@ -14,6 +14,31 @@
 extern PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the other server
 std::set<int64_t> BlockSet;
 
+void printChannelState()
+{
+    auto state = g_RPCCLient->channel->GetState(true);
+    switch (state) {
+        case GRPC_CHANNEL_IDLE:
+        std::cout << "CHANNEL = GRPC_CHANNEL_IDLE" << "\n";
+        break;
+        case GRPC_CHANNEL_CONNECTING:
+        std::cout << "CHANNEL = GRPC_CHANNEL_CONNECTING" << "\n";
+        break;
+        case GRPC_CHANNEL_READY:
+        std::cout << "CHANNEL = GRPC_CHANNEL_READY" << "\n";
+        break;
+        case GRPC_CHANNEL_TRANSIENT_FAILURE:
+        std::cout << "CHANNEL = GRPC_CHANNEL_TRANSIENT_FAILURE" << "\n";
+        break;
+        case GRPC_CHANNEL_SHUTDOWN:
+        std::cout << "CHANNEL = GRPC_CHANNEL_SHUTDOWN" << "\n";
+        break;
+
+        default:
+        std::cout << " Channel state unknown!\n";
+    }
+}
+
 void insert_block(int64_t address){
     int block_offset = address % 4096;
     BlockSet.insert(address/4096);
@@ -137,10 +162,9 @@ start:
 
         local_write(fd,buf,request->address());
         
-        int other_state = otherServer_IsAlive();
-        std::cout << "[BlockRPCServiceImpl::WriteBlock] Other State = " << other_state << "\n";
         // TODO: Have a global state for the other server - logging
         // Send the same request to our backup
+        printChannelState();
         int ret = g_RPCCLient->WriteBlock(request);
         if(ret == -1) {
             insert_block(request->address());

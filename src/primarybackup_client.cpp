@@ -7,8 +7,8 @@
 using grpc::ServerWriter;
 using grpc::ClientWriter;
 
-PrimaryBackupRPCClient::PrimaryBackupRPCClient(std::shared_ptr<Channel> channel)
-        : stub_(PrimaryBackupRPC::NewStub(channel))
+PrimaryBackupRPCClient::PrimaryBackupRPCClient(std::shared_ptr<Channel> c)
+        :channel(c), stub_(PrimaryBackupRPC::NewStub(channel))
 {   
     return;
 }
