@@ -24,7 +24,7 @@ void insert_block(int64_t address){
 
 static int otherServer_IsAlive()
 {
-    int state_other = g_RPCCLient->GetState(5);
+    int state_other = g_RPCCLient->GetState(StateMachine::getState());
     return state_other;
 }
 
@@ -82,6 +82,7 @@ start:
         int other_state = otherServer_IsAlive();
         if(other_state == -1) {
             // Other server is dead. Become the primary? TODO: RACE CONDITION!!!!!!!
+            StateMachine::setState(STATE_PRIMARY);
         } else if(other_state == STATE_PRIMARY) {
             // Redirect
             reply->set_responsecode(RESPONSE_REDIRECT);
@@ -114,7 +115,7 @@ Status BlockRPCServiceImpl::WriteBlock(ServerContext *context, const WriteReques
     pthread_mutex_lock(&RESYNC_LOCK);
     std::cout << "[BlockRPCServiceImpl::WriteBlock] Acquired RESYNC_LOCK!\n";
 
-    std::cout << "[WriteBlock] Requested addr = " << request->address() << "\n";
+    std::cout << "[BlockRPCServiceImpl::WriteBlock] Requested addr = " << request->address() << "\n";
     const uint8_t *buf = (const uint8_t *)(request->data().c_str());
     //for(int i = 0; i < 4096; ++i)
     //    printf("%x ", buf[i]);
@@ -122,9 +123,12 @@ Status BlockRPCServiceImpl::WriteBlock(ServerContext *context, const WriteReques
 
 start:
     int cur_state = StateMachine::getState();
+    std::cout << "[BlockRPCServiceImpl::WriteBlock] CurrentState = " << cur_state << "\n";
+
     if(cur_state == STATE_PRIMARY) {
         // TODO: Actually write to our 256gb file! @Himanshu
-        
+        std::cout << "[BlockRPCServiceImpl::WriteBlock] primary\n";
+
         local_write(fd,buf,request->address());
         
         // TODO: Have a global state for the other server - logging
@@ -141,6 +145,7 @@ start:
         int other_state = otherServer_IsAlive();
         if(other_state == -1) {
             // Other server is dead. Become the primary? TODO: RACE CONDITION!!!!!!!
+            StateMachine::setState(STATE_PRIMARY);
         } else if(other_state == STATE_PRIMARY) {
             // Redirect
             reply->set_responsecode(RESPONSE_REDIRECT);

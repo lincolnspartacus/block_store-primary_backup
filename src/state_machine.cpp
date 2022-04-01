@@ -20,7 +20,7 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
 {
     int state_other, ret;
     if(state == STATE_START) {
-        state_other = g_RPCCLient->GetState(5);
+        state_other = g_RPCCLient->GetState(getState());
         if(state_other == STATE_START) {
              setState(DEFAULT_ROLE); // Fed in from CMakeLists.txt as a -D compiler constant
              return;
@@ -29,8 +29,10 @@ void StateMachine::initState(PrimaryBackupRPCClient *g_RPCCLient)
 
     switch(state) {
         case STATE_START:
+        std::cout << "[StateMachine::initState] STATE_START contacting other server " << "\n";
         pthread_mutex_lock(&BACKUP_TRANSITION_LOCK);
-        state_other = g_RPCCLient->GetState(5);
+        state_other = g_RPCCLient->GetState(getState());
+        std::cout << "[StateMachine::initState] other_server state = " << state_other << "\n";
 
         if (state_other == -1) {
             setState(STATE_PRIMARY); // If no response from other server, become the PRIMARY

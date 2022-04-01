@@ -14,7 +14,7 @@ extern PrimaryBackupRPCClient *g_RPCCLient; // gRPC handle to call RPCs in the o
 Status PrimaryBackupRPCServiceImpl::GetState(ServerContext *context, const MessageInt *request,
                                         MessageInt *reply) {
     pthread_mutex_lock(&BACKUP_TRANSITION_LOCK);
-    std::cout << "[server] Inside GetState()" << "\n";
+    std::cout << "[server] Inside GetState() " << request->value() <<"\n";
     reply->set_value(StateMachine::getState());
     pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
     return Status::OK;

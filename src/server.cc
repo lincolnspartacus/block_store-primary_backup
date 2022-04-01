@@ -44,6 +44,7 @@ void run_server(char* loc)
         server_address = "localhost:50050";
     else
         server_address = "localhost:50051";
+    StateMachine::setState(STATE_START);
     BlockRPCServiceImpl service(mountpoint);
     ServerBuilder builder;
     
