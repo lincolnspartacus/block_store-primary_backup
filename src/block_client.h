@@ -22,9 +22,9 @@ class BlockRPCClient
 public:
     BlockRPCClient(std::shared_ptr<Channel> channel);
 
-    int DoMessageInt(int in);
-    int ReadBlock(int64_t address, uint8_t *buf);
-    int WriteBlock(int64_t address, uint8_t *buf);
+    std::pair<Status, MessageInt> DoMessageInt(int in);
+    std::pair<Status, ReadResponse> ReadBlock(int64_t address, uint8_t *buf);
+    std::pair<Status, WriteResponse> WriteBlock(int64_t address, uint8_t *buf);
 
 private:
     std::unique_ptr<BlockRPC::Stub> stub_;

@@ -14,7 +14,7 @@ BlockRPCClient::BlockRPCClient(std::shared_ptr<Channel> channel)
     return;
 }
 
-int BlockRPCClient::ReadBlock(int64_t address, uint8_t *buf)
+std::pair<Status, ReadResponse> BlockRPCClient::ReadBlock(int64_t address, uint8_t *buf)
 {
     // Context for the client. It could be used to convey extra information to
     // the server and/or tweak certain RPC behaviors.
@@ -25,23 +25,10 @@ int BlockRPCClient::ReadBlock(int64_t address, uint8_t *buf)
     ReadResponse reply;
     
     Status status = stub_->ReadBlock(&context, req, &reply);
-
-    // Act upon its status.
-    if (status.ok())
-    {
-        // TODO: Check response codes here! Redirect maybe?
-
-        // Fill up the client's buffer with 4Kb data
-        memcpy(buf, reply.data().c_str(), 4096);
-        return 0;
-    } else {
-        // TODO: Retry here! Contact other server maybe?
-    }
-
-    return 0;
+    return {status, reply};
 }
 
-int BlockRPCClient::WriteBlock(int64_t address, uint8_t *buf)
+std::pair<Status, WriteResponse> BlockRPCClient::WriteBlock(int64_t address, uint8_t *buf)
 {
      // Context for the client. It could be used to convey extra information to
     // the server and/or tweak certain RPC behaviors.
@@ -54,20 +41,10 @@ int BlockRPCClient::WriteBlock(int64_t address, uint8_t *buf)
     WriteResponse reply;
     
     Status status = stub_->WriteBlock(&context, req, &reply);
-
-    // Act upon its status.
-    if (status.ok())
-    {
-        // TODO: Check response codes here! Redirect maybe?
-        return 0;
-    } else {
-        // TODO: Retry here! Contact other server maybe?
-    }
-
-    return 0;
+    return {status, reply};
 }
 
-int BlockRPCClient::DoMessageInt(int in)
+std::pair<Status, MessageInt> BlockRPCClient::DoMessageInt(int in)
 {
     // Data we are sending to the server.
     MessageInt req;
@@ -83,20 +60,11 @@ int BlockRPCClient::DoMessageInt(int in)
     // The actual RPC.
     //auto start = std::chrono::high_resolution_clock::now();
     Status status = stub_->DoMessageInt(&context, req, &reply);
+    return {status, reply};
     //auto end = std::chrono::high_resolution_clock::now();
     //auto elapsed_seconds = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
     //rtt.push_back(elapsed_seconds);
 
     // Act upon its status.
-    if (status.ok())
-    {
-        return reply.value();
-    }
-    else
-    {
-        std::cout << status.error_code() << ": " << status.error_message()
-                    << std::endl;
-        return -1;
-    }
 }
 
