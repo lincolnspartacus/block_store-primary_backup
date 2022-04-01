@@ -79,12 +79,9 @@ Status BlockRPCServiceImpl::ReadBlock(ServerContext *context, const ReadRequest 
 start:
     int cur_state = StateMachine::getState();
     if(cur_state == STATE_PRIMARY) {
-        // TODO: Actually read from our 256gb file! @Himanshu
         
         uint8_t buf[4096];
         local_read(fd,buf,request->address());
-        
-        //memset(buf, 0xff, 4096);
         reply->set_data(std::string(buf, buf + 4096));
         reply->set_responsecode(RESPONSE_SUCCESS);
     } else if (cur_state == STATE_BACKUP) {
@@ -142,12 +139,9 @@ start:
     std::cout << "[BlockRPCServiceImpl::WriteBlock] CurrentState = " << cur_state << "\n";
 
     if(cur_state == STATE_PRIMARY) {
-        // TODO: Actually write to our 256gb file! @Himanshu
         std::cout << "[BlockRPCServiceImpl::WriteBlock] primary\n";
-
         local_write(fd,buf,request->address());
         
-        // TODO: Have a global state for the other server - logging
         // Send the same request to our backup
         printChannelState();
         int ret = g_RPCCLient->WriteBlock(request);
@@ -162,7 +156,7 @@ start:
         // Check if Primary server is alive
         int other_state = otherServer_IsAlive();
         if(other_state == -1) {
-            // Other server is dead. Become the primary? TODO: RACE CONDITION!!!!!!!
+            // Other server is dead. Become the primary
             StateMachine::setState(STATE_PRIMARY);
             local_write(fd,buf,request->address());
             reply->set_responsecode(RESPONSE_SUCCESS);

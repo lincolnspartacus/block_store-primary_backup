@@ -88,9 +88,9 @@ int PrimaryBackupRPCClient::ReSync()
     while (reader->Read(&request)) {
         std::cout << "Address :  " << request.address() << "\n"; 
         const uint8_t *buf = (const uint8_t *)(request.data().c_str());
-        for(int i = 0; i < 4096; ++i)
-            printf("%x ", buf[i]);
-        printf("\n");
+        //for(int i = 0; i < 4096; ++i)
+        //    printf("%x ", buf[i]);
+        //printf("\n");
         local_write(FD,buf,request.address());
 
     }

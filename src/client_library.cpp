@@ -42,7 +42,6 @@ int RPCClientLibrary::ReadBlock(int64_t address, uint8_t *buf)
                   << std::endl;
         currentPrimary = (currentPrimary + 1) % 2;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        // switchServer = false;
     }
     return -1;
 }
@@ -63,7 +62,6 @@ int RPCClientLibrary::WriteBlock(int64_t address, uint8_t *buf)
                   << std::endl;
         currentPrimary = (currentPrimary + 1) % 2;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        // switchServer = false;
     }
     return -1;
 }
