@@ -54,7 +54,7 @@ Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, const Empty *
     }
 
     std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Primary side resync done" << endl;
-
+    BlockSet.clear();
     pthread_mutex_unlock(&RESYNC_LOCK);
     //Recreate channel when backup is online and delete the old channel
     auto tmp = g_RPCCLient;
