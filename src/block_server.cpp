@@ -79,10 +79,15 @@ start:
         reply->set_responsecode(RESPONSE_SUCCESS);
     } else if (cur_state == STATE_BACKUP) {
         // Check if Primary server is alive
+        pthread_mutex_lock(&BACKUP_TRANSITION_LOCK);
         int other_state = otherServer_IsAlive();
         if(other_state == -1) {
-            // Other server is dead. Become the primary? TODO: RACE CONDITION!!!!!!!
+            // Other server is dead. Become the primary
             StateMachine::setState(STATE_PRIMARY);
+            uint8_t buf[4096];
+            local_read(fd,buf,request->address());
+            reply->set_data(std::string(buf, buf + 4096));
+            reply->set_responsecode(RESPONSE_SUCCESS);
         } else if(other_state == STATE_PRIMARY) {
             // Redirect
             reply->set_responsecode(RESPONSE_REDIRECT);
@@ -96,6 +101,7 @@ start:
             std::cout << "FATAL ERROR! Other state is unknown = " << other_state;
             assert(0);
         }
+        pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
     } else if (cur_state == STATE_START) {
         // We are booting up. Wait ...
         std::cout << "Server booting up, please wait. Retrying..\n";
@@ -141,11 +147,14 @@ start:
 
         reply->set_responsecode(RESPONSE_SUCCESS);
     } else if (cur_state == STATE_BACKUP) {
+        pthread_mutex_lock(&BACKUP_TRANSITION_LOCK);
         // Check if Primary server is alive
         int other_state = otherServer_IsAlive();
         if(other_state == -1) {
             // Other server is dead. Become the primary? TODO: RACE CONDITION!!!!!!!
             StateMachine::setState(STATE_PRIMARY);
+            local_write(fd,buf,request->address());
+            reply->set_responsecode(RESPONSE_SUCCESS);
         } else if(other_state == STATE_PRIMARY) {
             // Redirect
             reply->set_responsecode(RESPONSE_REDIRECT);
@@ -159,6 +168,7 @@ start:
             std::cout << "FATAL ERROR! Other state is unknown = " << other_state;
             assert(0);
         }
+        pthread_mutex_unlock(&BACKUP_TRANSITION_LOCK);
     } else if (cur_state == STATE_START) {
         // We are booting up. Wait ...
         std::cout << "Server booting up, please wait. Retrying..\n";
