@@ -153,6 +153,10 @@ start:
             StateMachine::setState(STATE_PRIMARY);
             local_write(fd,buf,request->address());
             reply->set_responsecode(RESPONSE_SUCCESS);
+
+            // Log the request too!
+            insert_block(request->address());
+            std::cout << "[WriteBlock] Backup is dead! Logging request..\n";
         } else if(other_state == STATE_PRIMARY) {
             // Redirect
             reply->set_responsecode(RESPONSE_REDIRECT);
