@@ -23,23 +23,35 @@ void sigintHandler(int sig_num)
     std::exit(0);
 }
 
-void mountdir(char* root, long size){
+void mountdir(std::string root, long size){
     
     //256 GB
     unsigned long long int bytes = 1024;
     unsigned long long int X;
     X = bytes*bytes*bytes*size - 1;
-    //unsigned long long int X =  274877906943;
-    FILE *fp = fopen("/users/pandotra/tmp/data", "w");
+    FILE *fp;
+    if (access(root.c_str(), F_OK) == 0)
+    {
+        // file exists, open in read/write mode
+        fp = fopen(root.c_str(), "r+");
+        std::cout <<"Mount dir exists"<<std::endl;
+    }
+    else{
+        //file doesn't exist, create(w+) and read/write file
+        fp = fopen(root.c_str(), "w+");
+    }
+    if(fp == NULL){
+        std::cout << "File mount issue "<<std::endl;
+        exit(0);
+    }
     fseek(fp, X , SEEK_SET);
     fputc('\0', fp);
     fclose(fp);
-    printf("Filesystem mounted on %s\n",root);
+    printf("Filesystem mounted on %s\n",root.c_str());
 }
 
-void run_server(char* loc)
+void run_server(std::string mountpoint)
 {
-    std::string mountpoint(loc);
     std::string server_address;
     if(DEFAULT_ROLE == STATE_PRIMARY)
         server_address = "localhost:50050";
@@ -86,8 +98,12 @@ void run_server(char* loc)
 
 int main(int argc, char* argv[])
 {
-    char* mountpoint;
-    mountpoint = strdup("/users/pandotra/tmp/data");
+    std::string default_mount_point;
+    if(DEFAULT_ROLE == STATE_PRIMARY)
+        default_mount_point = "/users/pandotra/tmp/data_primary";
+    else
+        default_mount_point = "/users/pandotra/tmp/data_backup";
+    //mountpoint = strdup("/users/pandotra/tmp/data");
     // if(argc<=1){
     //     std::cout<<"Usage: $./server 1  for New Block Storage OR $./server 0  for existing block storage "<<std::endl;
     //     exit(0);
@@ -104,7 +120,7 @@ int main(int argc, char* argv[])
     //     }
     // }
     
-    mountdir(mountpoint,256);
-    //signal(SIGINT, sigintHandler);
-    run_server(mountpoint);
+    mountdir(default_mount_point,256);
+    signal(SIGINT, sigintHandler);
+    run_server(default_mount_point);
 }
