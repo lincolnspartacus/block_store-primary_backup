@@ -2,7 +2,7 @@
 #include "locks.h"
 #include <unistd.h>
 
-static enum ServerStates state = STATE_START; // Default state is START
+static volatile enum ServerStates state = STATE_START; // Default state is START
 
 const enum ServerStates StateMachine::getState()
 {
