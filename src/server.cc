@@ -95,23 +95,6 @@ void run_server(std::string mountpoint)
 int main(int argc, char* argv[])
 {
     std::string default_mount_point{"/users/pandotra/tmp/data"};
-    //mountpoint = strdup("/users/pandotra/tmp/data");
-    // if(argc<=1){
-    //     std::cout<<"Usage: $./server 1  for New Block Storage OR $./server 0  for existing block storage "<<std::endl;
-    //     exit(0);
-    // }
-    // if (argc>1){
-    //     if (argv[1][0]=='1'){
-    //         long size = 256;
-    //         if (argc==3){
-
-    //             char *p;
-    //             size = strtol(argv[2], &p, 10);
-    //         }
-    //         mountdir(mountpoint,size);
-    //     }
-    // }
-    
     mountdir(default_mount_point,256);
     signal(SIGINT, sigintHandler);
     run_server(default_mount_point);

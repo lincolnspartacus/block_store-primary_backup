@@ -7,12 +7,7 @@
 
 
 BlockRPCClient::BlockRPCClient(std::shared_ptr<Channel> channel)
-        : stub_(BlockRPC::NewStub(channel))
-{   
-    ip_server1 = "localhost:50051";
-    ip_server2 = "localhost:50052";
-    return;
-}
+        : stub_(BlockRPC::NewStub(channel)) {}
 
 std::pair<Status, ReadResponse> BlockRPCClient::ReadBlock(int64_t address, uint8_t *buf)
 {
