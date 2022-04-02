@@ -52,11 +52,7 @@ void mountdir(std::string root, long size){
 
 void run_server(std::string mountpoint)
 {
-    std::string server_address;
-    if(DEFAULT_ROLE == STATE_PRIMARY)
-        server_address = "localhost:50050";
-    else
-        server_address = "localhost:50051";
+    std::string server_address{"0.0.0.0:50051"};
     StateMachine::setState(STATE_START);
     BlockRPCServiceImpl service(mountpoint);
     ServerBuilder builder;
@@ -98,11 +94,7 @@ void run_server(std::string mountpoint)
 
 int main(int argc, char* argv[])
 {
-    std::string default_mount_point;
-    if(DEFAULT_ROLE == STATE_PRIMARY)
-        default_mount_point = "/users/pandotra/tmp/data_primary";
-    else
-        default_mount_point = "/users/pandotra/tmp/data_backup";
+    std::string default_mount_point{"/users/pandotra/tmp/data"};
     //mountpoint = strdup("/users/pandotra/tmp/data");
     // if(argc<=1){
     //     std::cout<<"Usage: $./server 1  for New Block Storage OR $./server 0  for existing block storage "<<std::endl;

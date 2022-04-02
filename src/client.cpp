@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 
   std::vector<std::string> serverString;
   printf("*** Using new client ****\n");
-  serverString.push_back("localhost:50050");
-  serverString.push_back("localhost:50051");
+  serverString.push_back("c220g1-031114.wisc.cloudlab.us:50051"); // Node 0
+  serverString.push_back("c220g1-031111.wisc.cloudlab.us:50051"); // Node 1
 
   RPCClientLibrary *gRPCClient = new RPCClientLibrary(serverString);
 
