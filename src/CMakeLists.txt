@@ -3,10 +3,12 @@ cmake_minimum_required(VERSION 3.10)
 project(RBS)
 file(GLOB SRCS_SERVER server.cc locks.cpp block_server.cpp state_machine.cpp primarybackup_server.cpp primarybackup_client.cpp local_read_write.cpp)
 file(GLOB SRCS_CLIENT client.cpp block_client.cpp client_library.cpp)
+file(GLOB SRCS_CLIENT2 client2.cpp block_client.cpp client_library.cpp)
 
 add_executable(primary ${SRCS_SERVER})
 add_executable(backup ${SRCS_SERVER})
 add_executable(client ${SRCS_CLIENT})
+add_executable(client2 ${SRCS_CLIENT2})
 
 target_link_libraries(primary
         Threads::Threads
@@ -30,6 +32,13 @@ target_link_libraries(client
         p3protolib)
 add_dependencies(client p3protolib)
 set_target_properties(client PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+
+target_link_libraries(client2
+        Threads::Threads
+        gRPC::grpc++
+        p3protolib)
+add_dependencies(client2 p3protolib)
+set_target_properties(client2 PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 
 # set(CMAKE_BUILD_TYPE Debug)
 # cmake -DCMAKE_BUILD_TYPE=Debug

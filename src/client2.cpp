@@ -6,50 +6,18 @@
 
 RPCClientLibrary *gRPCClient = nullptr;
 
-int compare_buf(uint8_t *buf1, uint8_t *buf2, int len)
+int compare_buf(uint8_t *buf1, uint8_t *buf2)
 {
-    for(int i = 0; i < len; ++i)
+    for(int i = 0; i < 4096; ++i)
       if(buf1[i] != buf2[i])
         return 1;
 
     return 0;
 }
 
-void write_random_overlapping()
-{
-    // Writes to B0, B1, B2, B3, 3 Overlapping addresses
-    int offsets[] = {0, 4096*1, 4096*2, 4096*3, 1024, 3084,  4096*3 - 2345};
-
-    int blocks = sizeof(offsets)/sizeof(int);
-    // Perform same operations on this in-memory chunk, for comparison
-    uint8_t *in_mem_file = new uint8_t[4096 * 4];
-
-    for(int i = 0; i < blocks; ++i) {
-        uint8_t block_i[4096];
-        for(int j = 0; j < 4096; ++j)
-          block_i[j] = (uint8_t)rand();
-
-        int answer = gRPCClient->WriteBlock(offsets[i], block_i);
-        printf("Write Ret for Block %d = %d\n", i, answer);
-
-        memcpy(in_mem_file + offsets[i], block_i, 4096);
-    }
-
-    uint8_t *recvd_file = new uint8_t[4096 * 4];
-    for(int i = 0; i < blocks; ++i) {
-        int answer = gRPCClient->ReadBlock(offsets[i], recvd_file + offsets[i]);
-    }
-
-    if(compare_buf(recvd_file, in_mem_file, 4096 * 4) == 0) {
-        printf("write_random_overlapping() : Test PASSED!\n");
-    } else {
-        printf("write_random_overlapping() : Test FAILED :(\n");
-    }
-}
-
 void write_random_non_overlapping()
 {
-    srand(500);
+    srand(200);
     constexpr int blocks = 4;
     int offsets[blocks] = {0, 4096, 4096*2 + 234, 4096*10 + 76};
     uint8_t *buf[blocks];
@@ -74,13 +42,13 @@ void write_random_non_overlapping()
     uint8_t rcv_buf[4096];
     for(int i = 0; i < blocks; ++i) {
       int answer = gRPCClient->ReadBlock(offsets[i], rcv_buf);
-      if(compare_buf(rcv_buf, buf[i], 4096) == 1) {
-          printf("write_random_non_overlapping() : Test Test PASSED!\n");
+      if(compare_buf(rcv_buf, buf[i]) == 1) {
+          printf("write_random_non_overlapping() : Test failed!\n");
           return;
       }
     }
 
-    printf("write_random_non_overlapping() : Test FAILED :(\n");
+    printf("write_random_non_overlapping() : Test passed!\n");
 }
 
 int main(int argc, char *argv[])
@@ -103,9 +71,7 @@ int main(int argc, char *argv[])
   //   char user_input[10];
   //   scanf("%s", user_input);
   // }
-  
-  //write_random_non_overlapping();
-  write_random_overlapping();
+  write_random_non_overlapping();
 
   return 0;
 }
