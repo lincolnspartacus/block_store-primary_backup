@@ -125,7 +125,7 @@ Status BlockRPCServiceImpl::WriteBlock(ServerContext *context, const WriteReques
 {
     // Stall all writes until Resync is complete!
     std::cout << "[BlockRPCServiceImpl::WriteBlock] Trying to acquire RESYNC_LOCK\n";
-    pthread_mutex_lock(&RESYNC_LOCK);
+    pthread_rwlock_rdlock(&RESYNC_LOCK);
     std::cout << "[BlockRPCServiceImpl::WriteBlock] Acquired RESYNC_LOCK!\n";
 
     std::cout << "[BlockRPCServiceImpl::WriteBlock] Requested addr = " << request->address() << "\n";
@@ -183,7 +183,7 @@ start:
         assert(0);
     }
     
-    pthread_mutex_unlock(&RESYNC_LOCK);
+    pthread_rwlock_unlock(&RESYNC_LOCK);
     return Status::OK;
 }
 
