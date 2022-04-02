@@ -26,7 +26,6 @@ message WriteResponse {
 message Empty{
 }
 service BlockRPC {
-  rpc DoMessageInt (MessageInt) returns (MessageInt) {}
   rpc ReadBlock(ReadRequest) returns (ReadResponse) {}
   rpc WriteBlock(WriteRequest) returns (WriteResponse) {}
 }

@@ -43,28 +43,3 @@ std::pair<Status, WriteResponse> BlockRPCClient::WriteBlock(int64_t address, uin
     Status status = stub_->WriteBlock(&context, req, &reply);
     return {status, reply};
 }
-
-std::pair<Status, MessageInt> BlockRPCClient::DoMessageInt(int in)
-{
-    // Data we are sending to the server.
-    MessageInt req;
-    req.set_value(in);
-
-    // Container for the data we expect from the server.
-    MessageInt reply;
-
-    // Context for the client. It could be used to convey extra information to
-    // the server and/or tweak certain RPC behaviors.
-    ClientContext context;
-
-    // The actual RPC.
-    //auto start = std::chrono::high_resolution_clock::now();
-    Status status = stub_->DoMessageInt(&context, req, &reply);
-    return {status, reply};
-    //auto end = std::chrono::high_resolution_clock::now();
-    //auto elapsed_seconds = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    //rtt.push_back(elapsed_seconds);
-
-    // Act upon its status.
-}
-

@@ -21,8 +21,6 @@ class BlockRPCClient
 
 public:
     BlockRPCClient(std::shared_ptr<Channel> channel);
-
-    std::pair<Status, MessageInt> DoMessageInt(int in);
     std::pair<Status, ReadResponse> ReadBlock(int64_t address, uint8_t *buf);
     std::pair<Status, WriteResponse> WriteBlock(int64_t address, uint8_t *buf);
 

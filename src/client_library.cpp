@@ -65,26 +65,3 @@ int RPCClientLibrary::WriteBlock(int64_t address, uint8_t *buf)
     }
     return -1;
 }
-
-int RPCClientLibrary::DoMessageInt(int in)
-{
-
-    bool switchServer = true;
-    while (switchServer)
-    {
-        auto [status, reply] = g_RPCCLient[currentPrimary]->DoMessageInt(in);
-        //if (status.ok() && reply.responseCode != RESPONSE_REDIRECT)
-        if (status.ok())
-        {
-            return reply.value();
-        }
-        std::cout << status.error_code() << ": " << status.error_message()
-                  << std::endl;
-        std::cout << "\nSwitching primary to other server::: \n"
-                  << std::endl;
-        currentPrimary = (currentPrimary + 1) % 2;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); 
-        //switchServer = false;
-    }
-    return -1;
-}

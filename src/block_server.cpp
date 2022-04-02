@@ -64,13 +64,6 @@ BlockRPCServiceImpl::BlockRPCServiceImpl(const std::string& fileStore)
         exit(EXIT_FAILURE);
     }
 }
-Status BlockRPCServiceImpl::DoMessageInt(ServerContext *context, const MessageInt *request,
-                                        MessageInt *reply) {
-    const int output = request->value() * 2;
-    std::cout << "[server] " << request->value() << " -> " << output << " " << std::endl;
-    reply->set_value(output);
-    return Status::OK;
-}
 
 Status BlockRPCServiceImpl::ReadBlock(ServerContext *context, const ReadRequest *request, ReadResponse *reply)
 {
