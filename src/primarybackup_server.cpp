@@ -40,7 +40,7 @@ Status PrimaryBackupRPCServiceImpl::WriteBlock(ServerContext *context, const Wri
 
 Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, const Empty *empty_req, ServerWriter<WriteRequest> *writer) {
     
-    pthread_rwlock_wrlock(&RESYNC_LOCK);
+    pthread_mutex_lock(&RESYNC_LOCK);
 
     std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Inside here "<<std::endl;
     WriteRequest request;
@@ -56,7 +56,7 @@ Status PrimaryBackupRPCServiceImpl::ReSync(ServerContext* context, const Empty *
 
     std::cout << "[PrimaryBackupRPCServiceImpl::ReSync] Primary side resync done" << endl;
     BlockSet.clear();
-    pthread_rwlock_unlock(&RESYNC_LOCK);
+    pthread_mutex_unlock(&RESYNC_LOCK);
     //Recreate channel when backup is online and delete the old channel
     auto tmp = g_RPCCLient;
     g_RPCCLient = new PrimaryBackupRPCClient(grpc::CreateChannel(OTHER_IP, grpc::InsecureChannelCredentials()));

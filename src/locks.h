@@ -3,7 +3,7 @@
 /*
  * Lock for stalling client requests at the primary 
  * during Resync process */
-extern pthread_rwlock_t RESYNC_LOCK;
+extern pthread_mutex_t RESYNC_LOCK;
 
 /*
  * Lock for atomically transitioning our Backup Server
