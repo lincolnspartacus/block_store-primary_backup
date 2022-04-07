@@ -28,11 +28,11 @@ on the Backup and only on success of both does the client get an ACK.
 					  retransmits these blocks to the Backup during RESYNC
 
 2.1 Correctness
-* Availability - Crash hideen from user - https://docs.google.com/file/d/1UmBQEqQj2KiWeosc7DhD2qFE1iZgOBXX/preview
+* Availability - Crash hidden from user - https://docs.google.com/file/d/1UmBQEqQj2KiWeosc7DhD2qFE1iZgOBXX/preview
 * Strong Consistency - Read back latest value - https://docs.google.com/file/d/14NXFGE0vecb-l6I4U7HZlxUZ4Vib3WIh/preview
 Other video links - RESYNC process (https://docs.google.com/file/d/1fqPV0cyLNjER_dgmSKBd9NvxN-tLg5Hg/preview)
 				  - Fail-over process (https://docs.google.com/file/d/1uUf8F3JcSq4kuZT8S4bBL0BvT1p-eo6-/preview)
-* Testing Strategy - Wrote random data to multiple clients and emulated the writes on a local in-memory buffer.
+* Testing Strategy - Wrote random data to multiple overlapping/non-overlapping blocks and emulated the writes on a local in-memory buffer.
                      Then read the data back and compared it with our local buffer (client.cpp#L18).
 					 For multiple clients, used carefully chosen delays() to get a deterministic order.
 					 Injected crash by using a special address for crashing. Verified correct output by
