@@ -39,5 +39,9 @@ Other video links - RESYNC process (https://docs.google.com/file/d/1fqPV0cyLNjER
 					 comparing result with local buffer.
 
 2.2 Performance
-* Please refer to the report for detailed numbers
+* Latency, 2 servers - Read = 885 us, Write = 38602 us
+* Latency, 1 server - Read = 894 us, Write = 22929 us
+* Fail-over time - 16ms, RESYNC time - 256ms
+* No performance difference b/w aligned and unaligned requests
+* Please refer to the report for a detailed explanation
 
